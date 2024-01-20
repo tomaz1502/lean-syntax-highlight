@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-lean-syntax-highlight",
+  "name": "Lean Syntax Highlight",
+  "author": "tomaz1502",
+  "authorUrl": "https://github.com/tomaz1502",
+  "description": "Provides live syntax highlight for the Lean programming language",
+  "isDesktopOnly": false,
+  "version": "0.0.1",
+  "minAppVersion": "0.15.0"
+}
