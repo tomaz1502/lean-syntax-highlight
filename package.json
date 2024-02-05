@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-lean-syntax-highlight",
+  "name": "lean-syntax-highlight",
   "version": "0.0.1",
   "description": "Show syntax highlighing in code blocks the editor",
   "main": "main.js",
@@ -13,7 +13,7 @@
   "author": "Lewuathe",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomaz1502/obsidian-lean-syntax-highlight"
+    "url": "https://github.com/tomaz1502/lean-syntax-highlight"
   },
   "license": "MIT",
   "devDependencies": {
