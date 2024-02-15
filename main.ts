@@ -1,4 +1,3 @@
-import './styles.scss'
 import { Plugin } from 'obsidian'
 
 import './mode/lean/lean'
