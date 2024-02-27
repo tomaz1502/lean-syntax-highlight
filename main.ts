@@ -4,25 +4,10 @@ import './mode/lean/lean'
 
 export default class LeanSyntaxHighlightPlugin extends Plugin {
 
-  modesToKeep = ["hypermd", "markdown", "null", "xml"];
-
-  onload(): void {
-      this.app.workspace.onLayoutReady(() => {
-        this.refreshLeaves();
-      });
-  }
+  onload(): void { }
 
   onunload() {
-    for (const key in CodeMirror.modes) {
-      if (CodeMirror.modes.hasOwnProperty(key) && !this.modesToKeep.includes(key)) {
-        delete CodeMirror.modes[key];
-      }
-    }
-
-    this.refreshLeaves();
+    delete CodeMirror.modes["lean"];
   }
 
-  refreshLeaves = () => {
-    this.app.workspace.iterateCodeMirrors(cm => cm.setOption("mode", cm.getOption("mode")))
-  }
 }
