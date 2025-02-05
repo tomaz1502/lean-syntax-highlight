@@ -16,25 +16,19 @@
       token: function(stream, state) {
         if (stream.eatSpace()) return null;
 
-        if (state.inComment) {
-          if (stream.match(/.*?-\//)) {
-            state.inComment = false;
+        if (state.commentLevel > 0) {
+          if (stream.match(/.*?\/-/)) {
+            state.commentLevel += 1;
+          } else if (stream.match(/.*?-\//)) {
+            state.commentLevel -= 1;
           } else {
             stream.skipToEnd();
           }
           return "comment";
         }
 
-
-        if (state.inComment) {
-          if (stream.match(/-\//)) {
-            state.inComment = false;
-          }
-          return "comment";
-        }
-
         if (stream.match(/\/-/)) {
-          state.inComment = true;
+          state.commentLevel += 1;
           return "comment";
         }
 
@@ -99,7 +93,7 @@
         return null;
       },
       startState: function() {
-        return { inDefinition: false, inComment: false };
+        return { inDefinition: false, commentLevel: 0 };
       }
     };
   });
