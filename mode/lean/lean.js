@@ -7,25 +7,100 @@
     mod(CodeMirror)
 })(function(CodeMirror) {
   "use strict"
-  CodeMirror.defineSimpleMode("lean", {
-    start: [
-      { regex: /\b0b[01]+\b/i, token: "number" },
-      { regex: /\b0o[0-7]+\b/i, token: "number" },
-      { regex: /\b0x[0-9a-f]+\b/i, token: "number" },
-      { regex: /\b-?\d+(?:\.\d+)?(?:e[-+]?\d+)?\b/i, token: "number" },
-      { regex: /(?:\/-[\s\S]*?-\/)|(?:--.*$)/m, token: "comment" },
-      { regex: /\b(?:show|have|from|suffices|nomatch|set_option|initialize|builtin_initialize|example|universe|universes|variable|variables|import|open|export|theory|prelude|renaming|hiding|exposing|do|by|let|extends|mutual|mut|where|rec|syntax|macro_rules|macro|deriving|fun|section|namespace|end|infix|infixl|infixr|postfix|prefix|notation|if|then|else|calc|match|with|for|in|unless|try|catch|finally|return|continue|break|global|local|scoped|partial|unsafe|private|protected|noncomputable|true|false)\b/, token: "keyword" },
-      { regex: /#(print|check|eval|reduce|check_failure)\b/, token: "operator" },
-      { regex: /\+|\*|-|\/|:=|>>>|<<<|\^\^\^|&&&|\|\|\||\+\+|\^|%|~~~|<|<=|>|>=|==|=/, token: "operator" },
-      { regex: /[()\[\]{},:]/, token: "meta" },
-      { regex: /\b(?:sorry|admit)\b/, token: "error" },
-      { regex: /(\b(inductive|coinductive|structure|theorem|axiom|abbrev|lemma|def|instance|class|constant))(\s+)/, token: "keyword", push: "definition" },
-      { regex: /"[^"]*"|'[^']'/, token: "string" },
-      { regex: /@\[[^\]\n]*\]/, token: "keyword" },
-      { regex: /\`[^(\s]*/, token: "operator" }
-    ],
-    definition: [
-      { regex: /(\w+)/, token: "attribute", pop: true }
-    ]
-  })
+
+  const keywords =
+    [ "show","have","from","suffices","nomatch","set_option","initialize","builtin_initialize","example","universe","universes","variable","variables","import","open","export","theory","prelude","renaming","hiding","exposing","do","by","let","extends","mutual","mut","where","rec","syntax","macro_rules","macro","deriving","fun","section","namespace","end","infix","infixl","infixr","postfix","prefix","notation","if","then","else","calc","match","with","for","in","unless","try","catch","finally","return","continue","break","global","local","scoped","partial","unsafe","private","protected","noncomputable","true","false" ];
+
+  CodeMirror.defineMode("lean", function() {
+    return {
+      token: function(stream, state) {
+        if (stream.eatSpace()) return null;
+
+        if (state.inComment) {
+          if (stream.match(/.*?-\//)) {
+            state.inComment = false;
+          } else {
+            stream.skipToEnd();
+          }
+          return "comment";
+        }
+
+
+        if (state.inComment) {
+          if (stream.match(/-\//)) {
+            state.inComment = false;
+          }
+          return "comment";
+        }
+
+        if (stream.match(/\/-/)) {
+          state.inComment = true;
+          return "comment";
+        }
+
+        if (stream.match(/--.*/)) {
+          return "comment";
+        }
+
+        if (stream.match(/\b0b[01]+\b/i) ||
+            stream.match(/\b0o[0-7]+\b/i) ||
+            stream.match(/\b0x[0-9a-f]+\b/i) ||
+            stream.match(/\b-?\d+(?:\.\d+)?(?:e[-+]?\d+)?\b/i)) {
+          return "number";
+        }
+
+        if (stream.match(new RegExp(`\b(?:${keywords.join("|")})\b`))) {
+          return "keyword";
+        }
+
+        if (stream.match(/#(print|check|eval|reduce|check_failure)\b/)) {
+          return "operator";
+        }
+
+        if (stream.match(/\+|\*|-|\/|:=|>>>|<<<|\^\^\^|&&&|\|\|\||\+\+|\^|%|~~~|<|<=|>|>=|==|=/)) {
+          return "operator";
+        }
+
+        if (stream.match(/[()\[\]{},:]/)) {
+          return "meta";
+        }
+
+        if (stream.match(/\b(?:sorry|admit)\b/)) {
+          return "error";
+        }
+
+        if (stream.match(/\b(inductive|coinductive|structure|theorem|axiom|abbrev|lemma|def|instance|class|constant)\b/)) {
+          state.inDefinition = true;
+          return "keyword";
+        }
+
+        if (state.inDefinition && stream.match(/\w+/)) {
+          state.inDefinition = false;
+          return "attribute";
+        }
+
+        if (stream.match(/"[^"\\]*(?:\\.[^"\\]*)*"/)) {
+          return "string";
+        }
+
+        if (stream.match(/'[^'\\]*(?:\\.[^'\\]*)*'/)) {
+          return "string";
+        }
+
+        if (stream.match(/@\[[^\]\n]*\]/)) {
+          return "keyword";
+        }
+
+        if (stream.match(/\`[^(\s]*/)) {
+          return "operator";
+        }
+
+        stream.next();
+        return null;
+      },
+      startState: function() {
+        return { inDefinition: false, inComment: false };
+      }
+    };
+  });
 });
